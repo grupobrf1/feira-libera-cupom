@@ -240,8 +240,20 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .then((data) => {
         console.log("Dados recebidos:", data);
-        mostrarMensagemStatus(data.mensagem, status);
-        listarPedidosPendentes();
+        mostrarMensagemStatus(
+          data.mensagem,
+          status,
+          transacao,
+          button
+            .closest(".pedido-box")
+            .querySelector(".pedido-info:nth-child(2)")
+            .textContent.split(": ")[1],
+          button
+            .closest(".pedido-box")
+            .querySelector(".pedido-info:nth-child(7)")
+            .textContent.split(": ")[1]
+        );
+        removerPedidoDaTela(button);
       })
       .catch((error) => {
         console.error("Erro ao atualizar status do pedido:", error);
@@ -254,15 +266,23 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   }
 
-  function mostrarMensagemStatus(mensagem, status) {
+  function mostrarMensagemStatus(mensagem, status, transacao, cliente, valor) {
     mensagemStatus.className = `alert ${
       status ? "alert-success" : "alert-danger"
     }`;
-    mensagemStatus.textContent = mensagem;
+    mensagemStatus.textContent = `${mensagem} - Transação: ${transacao}, Cliente: ${cliente}, Valor: ${valor}`;
     mensagemStatus.classList.remove("d-none");
     setTimeout(() => {
       mensagemStatus.classList.add("d-none");
-    }, 3000); // Ocultar mensagem após 3 segundos
+    }, 5000); // Ocultar mensagem após 5 segundos
+  }
+
+  function removerPedidoDaTela(button) {
+    const pedidoBox = button.closest(".pedido-box");
+    pedidoBox.style.opacity = 0;
+    setTimeout(() => {
+      pedidoBox.remove();
+    }, 1000);
   }
 
   function selecionarItemMenu(id) {
@@ -291,6 +311,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const date = new Date(data);
     return date.toLocaleString("pt-BR", { timeZone: "UTC" });
   }
+
+  // Atualizar lista de pedidos pendentes a cada 10 segundos
+  setInterval(listarPedidosPendentes, 10000);
+  setInterval(listarPedidosHistorico, 10000);
 
   // Inicializar a seção de pedidos pendentes por padrão
   listarPedidosPendentes();

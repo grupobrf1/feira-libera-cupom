@@ -106,3 +106,76 @@ input[type="password"]::-webkit-reveal-button {
   width: 24px;
   height: 24px;
 }
+
+/* Estilo para pedidos */
+.pedido-box {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 15px;
+  background-color: #f8f9fa;
+  transition: opacity 1s ease-out;
+}
+
+.dark-mode .pedido-box {
+  background-color: #444;
+  border-color: #666;
+}
+
+.pedido-info {
+  margin-bottom: 5px;
+}
+
+.loading-spinner {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 0.2em solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spinner-border 0.75s linear infinite;
+}
+
+/* Estilo para a barra lateral */
+.sidebar {
+  height: 100vh;
+  padding-top: 20px;
+  background-color: #f8f9fa;
+}
+
+.sidebar-heading {
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  padding: 0 1rem;
+  color: #6c757d;
+}
+
+.nav-link {
+  padding: 0.75rem 1rem;
+  border-radius: 0.25rem;
+}
+
+.nav-link.active {
+  background-color: #007bff;
+  color: white !important;
+  border-radius: 0.25rem;
+}
+
+/* Estilo para a barra lateral no modo escuro */
+.dark-mode .sidebar {
+  background-color: #333;
+  color: #fff;
+}
+
+.dark-mode .sidebar-heading {
+  color: #ccc;
+}
+
+.dark-mode .nav-link {
+  color: #ccc;
+}
+
+.dark-mode .nav-link.active {
+  background-color: #007bff;
+  color: white !important;
+}
