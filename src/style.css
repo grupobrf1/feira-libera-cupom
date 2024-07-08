@@ -1,0 +1,108 @@
+/* Estilo para o corpo do documento */
+body {
+  background-color: #f8f9fa;
+  font-family: Arial, sans-serif;
+}
+
+/* Estilo para o modo escuro */
+body.dark-mode {
+  background-color: #2e2e2e;
+  color: #ffffff;
+}
+
+/* Estilo para o contêiner principal */
+.container {
+  max-width: 600px;
+  margin-top: 50px;
+  padding: 15px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo para o contêiner principal no modo escuro */
+body.dark-mode .container {
+  background-color: #444444;
+}
+
+/* Estilo para os cabeçalhos */
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Estilo para os grupos de formulário */
+.form-group {
+  margin-bottom: 15px;
+}
+
+/* Estilo para o botão primário */
+.btn-primary {
+  width: 100%;
+}
+
+/* Estilo para campos de entrada somente leitura */
+input[readonly] {
+  background-color: #e9ecef;
+}
+
+/* Animação de carregamento */
+.loading::after {
+  content: "...";
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    content: "...";
+  }
+  33% {
+    content: ".";
+  }
+  66% {
+    content: "..";
+  }
+  100% {
+    content: "...";
+  }
+}
+
+/* Desativar botão de revelar senha no Edge e Chrome */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-webkit-clear-button,
+input[type="password"]::-webkit-reveal-button {
+  display: none;
+}
+
+/* Adicionar shake animation para inputs inválidos */
+.is-invalid {
+  border-color: red;
+  animation: shake 0.5s;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+  75% {
+    transform: translateX(-4px);
+  }
+}
+
+/* Adicionar estilo para o ícone de visibilidade da senha */
+.field-icon {
+  position: absolute;
+  right: 10px;
+  top: 70%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+}
