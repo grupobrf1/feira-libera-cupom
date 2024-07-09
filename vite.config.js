@@ -5,7 +5,7 @@ export default defineConfig({
   server: {
     host: true,
     port: 3000,
-    open: "/login_vendedor", // Abre automaticamente a página de login
+    open: "/login", // Abre automaticamente a página de login
     proxy: {
       "/api": {
         target: "https://api-feira.azurewebsites.net",
@@ -17,8 +17,8 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        login_vendedor: resolve(__dirname, "public/login_vendedor.html"),
-        libera_pedido: resolve(__dirname, "public/libera_pedido.html"), // Adiciona a nova página
+        login: resolve(__dirname, "public/login.html"),
+        libera_pedido: resolve(__dirname, "public/libera_pedido.html"),
       },
     },
   },
@@ -35,8 +35,8 @@ export default defineConfig({
           if (req.url === "/libera_pedido") {
             req.url = "/libera_pedido.html";
           }
-          if (req.url === "/login_vendedor") {
-            req.url = "/login_vendedor.html";
+          if (req.url === "/login") {
+            req.url = "/login.html";
           }
           next();
         });

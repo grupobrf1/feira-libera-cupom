@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("logoutBtn").addEventListener("click", () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("userName");
-    window.location.href = "/login_vendedor";
+    window.location.href = "/login";
   });
 
   document.getElementById("pendente-tab").addEventListener("click", () => {
