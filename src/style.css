@@ -18,6 +18,7 @@ body.dark-mode {
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  position: relative; /* Adicionando posição relativa */
 }
 
 /* Estilo para o contêiner principal no modo escuro */
@@ -159,6 +160,15 @@ input[type="password"]::-webkit-reveal-button {
   background-color: #007bff;
   color: white !important;
   border-radius: 0.25rem;
+}
+
+/* Ajustar a posição do botão de sair */
+#logoutBtn {
+  margin-top: 60px; /* Adicione a margem superior necessária */
+  margin-right: 10px; /* Ajuste conforme necessário */
+  position: absolute;
+  top: 10px;
+  right: 10px;
 }
 
 /* Estilo para a barra lateral no modo escuro */
