@@ -35,12 +35,17 @@ document.addEventListener("DOMContentLoaded", function () {
         Authorization: `Bearer ${accessToken}`,
       },
     })
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Erro ao buscar pedidos pendentes");
+        }
+        return response.json();
+      })
       .then((data) => {
         const pendentePedidos = document.getElementById("pendentePedidos");
         pendentePedidos.innerHTML = "";
 
-        if (Array.isArray(data)) {
+        if (Array.isArray(data) && data.length > 0) {
           data.forEach((pedido) => {
             const pedidoElement = document.createElement("div");
             pedidoElement.className = "pedido-box";
@@ -85,7 +90,16 @@ document.addEventListener("DOMContentLoaded", function () {
             `;
             pendentePedidos.appendChild(pedidoElement);
           });
+        } else {
+          pendentePedidos.innerHTML =
+            '<div class="alert alert-info">Não há pedidos pendentes no momento.</div>';
         }
+      })
+      .catch((error) => {
+        console.error("Erro ao buscar pedidos pendentes:", error);
+        const pendentePedidos = document.getElementById("pendentePedidos");
+        pendentePedidos.innerHTML =
+          '<div class="alert alert-danger">Erro ao buscar pedidos pendentes.</div>';
       });
   }
 
@@ -135,8 +149,8 @@ document.addEventListener("DOMContentLoaded", function () {
               <div class="pedido-info"><strong>Vendedor:</strong> ${
                 pedido.usuariofunc
               }</div>
-              <div class="pedido-info"><strong>Data Lançamento:</strong> ${formatarData(
-                pedido.dtlanc
+              <div class="pedido-info"><strong>Data Validação:</strong> ${formatarData(
+                pedido.dtvalidacaofin
               )}</div>
               <div class="pedido-info"><strong>Distribuidora:</strong> ${
                 pedido.filial
@@ -189,8 +203,8 @@ document.addEventListener("DOMContentLoaded", function () {
               <div class="pedido-info"><strong>Vendedor:</strong> ${
                 pedido.usuariofunc
               }</div>
-              <div class="pedido-info"><strong>Data Lançamento:</strong> ${formatarData(
-                pedido.dtlanc
+              <div class="pedido-info"><strong>Data Validação:</strong> ${formatarData(
+                pedido.dtvalidacaofin
               )}</div>
               <div class="pedido-info"><strong>Distribuidora:</strong> ${
                 pedido.filial
@@ -234,14 +248,25 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       body: JSON.stringify(payload),
     })
-      .then((response) => {
-        console.log("Resposta da requisição:", response);
-        return response.json();
+      .then(async (response) => {
+        const responseBody = await response.text();
+        let data;
+        try {
+          data = JSON.parse(responseBody);
+        } catch (e) {
+          data = { detail: responseBody };
+        }
+        return { status: response.status, body: data };
       })
       .then((data) => {
-        console.log("Dados recebidos:", data);
+        if (data.status !== 200) {
+          throw new Error(
+            data.body.detail || "Erro ao atualizar status do pedido"
+          );
+        }
+        console.log("Dados recebidos:", data.body);
         mostrarMensagemStatus(
-          data.mensagem,
+          data.body.mensagem,
           status,
           transacao,
           button
@@ -257,6 +282,14 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .catch((error) => {
         console.error("Erro ao atualizar status do pedido:", error);
+        mostrarMensagemStatus(
+          `Erro: ${error.message}`,
+          false,
+          transacao,
+          "",
+          ""
+        );
+        removerPedidoDaTela(button);
       })
       .finally(() => {
         // Remover loading e reabilitar botões
@@ -274,7 +307,7 @@ document.addEventListener("DOMContentLoaded", function () {
     mensagemStatus.classList.remove("d-none");
     setTimeout(() => {
       mensagemStatus.classList.add("d-none");
-    }, 5000); // Ocultar mensagem após 5 segundos
+    }, 10000); // Ocultar mensagem após 10 segundos
   }
 
   function removerPedidoDaTela(button) {
@@ -309,7 +342,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function formatarData(data) {
     const date = new Date(data);
-    return date.toLocaleString("pt-BR", { timeZone: "UTC" });
+    return date.toLocaleString("pt-BR");
   }
 
   // Atualizar lista de pedidos pendentes a cada 10 segundos
