@@ -67,5 +67,5 @@ jobs:
         with:
           app-name: 'feira-libera-cupom'
           slot-name: 'Production'
-          package: .
+          package: 'dist'
           
