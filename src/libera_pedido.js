@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("logoutBtn").addEventListener("click", () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("userName");
-    window.location.href = "/login";
+    window.location.href = "./index.html";
   });
 
   document.getElementById("pendente-tab").addEventListener("click", () => {
@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   function listarPedidosPendentes() {
-    fetch("/api/listarpedidosnaovalidados", {
+    fetch("https://sga.grupobrf1.com:10000/listarpedidosnaovalidados", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -109,7 +109,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function listarPedidosAprovados() {
-    fetch("/api/listarsolicitacoesaprovadas", {
+    fetch("https://sga.grupobrf1.com:10000/listarsolicitacoesaprovadas", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -163,7 +163,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function listarPedidosNegados() {
-    fetch("/api/listarsolicitacoesnegadas", {
+    fetch("https://sga.grupobrf1.com:10000/listarsolicitacoesnegadas", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -240,7 +240,7 @@ document.addEventListener("DOMContentLoaded", function () {
     loadingSpinner.className = "loading-spinner";
     button.parentNode.appendChild(loadingSpinner);
 
-    fetch(`/api/aprovarrejeitarpedido`, {
+    fetch(`https://sga.grupobrf1.com:10000/aprovarrejeitarpedido`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
