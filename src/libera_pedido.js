@@ -36,7 +36,15 @@ document.addEventListener("DOMContentLoaded", function () {
       },
     })
       .then((response) => {
-        if (!response.ok) {
+        if (response.status === 403) {
+          // Redirecionar para outra página em caso de erro 403
+          //alert('Você não deveria estar aqui!')
+          window.location.href = "pagina_erro_403.html"; // Substitua pelo caminho correto
+          return Promise.reject(new Error("Acesso proibido"));
+        } else if (response.status === 404) {
+          // Tratar erro 404 (nenhum resultado)
+          return Promise.resolve([]); // Retorna um array vazio para indicar que não há dados
+        } else if (!response.ok) {
           throw new Error("Erro ao buscar pedidos pendentes");
         }
         return response.json();

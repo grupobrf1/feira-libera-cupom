@@ -29,7 +29,9 @@ export default defineConfig({
         brf1ico: resolve(__dirname, "public/brf1.ico"),
         eye: resolve(__dirname, "src/icons/eye.svg"),
         eye_off: resolve(__dirname, "src/icons/eye-off.svg"),
-        style: resolve(__dirname, "src/style.css")
+        style: resolve(__dirname, "src/style.css"),
+        sound: resolve(__dirname, "src/sound.mp3"),
+        proibido: resolve(__dirname, "src/pagina_erro_403.html")
       },
     },
   },
