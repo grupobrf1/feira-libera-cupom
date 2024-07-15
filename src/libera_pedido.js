@@ -180,10 +180,13 @@ document.addEventListener("DOMContentLoaded", () => {
       mostrarModalConfirmacao(acao, pedidoBox, event.target);
     }
   });
-
   // Função para mostrar o modal de confirmação
   function mostrarModalConfirmacao(acao, pedidoBox, button) {
-    document.getElementById("acaoModal").textContent = acao;
+    const acaoElement = document.getElementById("acaoModal");
+    acaoElement.textContent = acao;
+    acaoElement.className =
+      acao === "aprovar" ? "text-success fw-bold" : "text-danger fw-bold";
+
     document.getElementById("confirmaTransacao").textContent = pedidoBox
       .querySelector(".pedido-info:nth-child(1)")
       .textContent.split(": ")[1];
