@@ -157,6 +157,9 @@ document.addEventListener("DOMContentLoaded", function () {
               <div class="pedido-info"><strong>Data Validação:</strong> ${formatarData(
                 pedido.dtvalidacaofin
               )}</div>
+              <div class="pedido-info"><strong>Usuário Libera:</strong> ${
+                pedido.usuariovalidacaofin
+              }</div>
               <div class="pedido-info"><strong>Distribuidora:</strong> ${
                 pedido.filial
               }</div>
@@ -211,6 +214,9 @@ document.addEventListener("DOMContentLoaded", function () {
               <div class="pedido-info"><strong>Data Validação:</strong> ${formatarData(
                 pedido.dtvalidacaofin
               )}</div>
+              <div class="pedido-info"><strong>Usuário Libera:</strong> ${
+                pedido.usuariovalidacaofin
+              }</div>
               <div class="pedido-info"><strong>Distribuidora:</strong> ${
                 pedido.filial
               }</div>
