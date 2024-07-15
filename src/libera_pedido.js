@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
   const accessToken = localStorage.getItem("accessToken");
   const userName = localStorage.getItem("userName");
 
@@ -7,240 +7,183 @@ document.addEventListener("DOMContentLoaded", function () {
   const mensagemStatus = document.getElementById("mensagemStatus");
   const tituloBemVindo = document.getElementById("tituloBemVindo");
 
+  // Atualiza o título de boas-vindas com o nome do usuário
   tituloBemVindo.textContent = `Bem-vindo, ${userName}`;
 
+  // Configura o botão de logout
   document.getElementById("logoutBtn").addEventListener("click", () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("userName");
     window.location.href = "./index.html";
   });
 
+  // Configura os tabs de navegação
   document.getElementById("pendente-tab").addEventListener("click", () => {
+    mostrarSecaoPendente();
+  });
+
+  document.getElementById("historico-tab").addEventListener("click", () => {
+    mostrarSecaoHistorico();
+  });
+
+  // Função para mostrar a seção de pedidos pendentes
+  function mostrarSecaoPendente() {
     pendenteSection.classList.remove("d-none");
     historicoSection.classList.add("d-none");
     listarPedidosPendentes();
     selecionarItemMenu("pendente-tab");
-  });
+  }
 
-  document.getElementById("historico-tab").addEventListener("click", () => {
+  // Função para mostrar a seção de histórico de pedidos
+  function mostrarSecaoHistorico() {
     pendenteSection.classList.add("d-none");
     historicoSection.classList.remove("d-none");
     listarPedidosHistorico();
     selecionarItemMenu("historico-tab");
-  });
-
-  function listarPedidosPendentes() {
-    fetch("https://sga.grupobrf1.com:10000/listarpedidosnaovalidados", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    })
-      .then((response) => {
-        if (response.status === 403) {
-          window.location.href = "pagina_erro_403.html";
-          return Promise.reject(new Error("Acesso proibido"));
-        } else if (response.status === 404) {
-          return Promise.resolve([]);
-        } else if (!response.ok) {
-          throw new Error("Erro ao buscar pedidos pendentes");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        const pendentePedidos = document.getElementById("pendentePedidos");
-        pendentePedidos.innerHTML = "";
-
-        if (Array.isArray(data) && data.length > 0) {
-          data.forEach((pedido) => {
-            const pedidoElement = document.createElement("div");
-            pedidoElement.className = "pedido-box";
-            pedidoElement.innerHTML = `
-              <div class="pedido-info"><strong>Transação:</strong> ${
-                pedido.transacao
-              }</div>
-              <div class="pedido-info"><strong>Cliente:</strong> ${
-                pedido.cliente
-              }</div>
-              <div class="pedido-info"><strong>CNPJ:</strong> ${formatarCNPJ(
-                pedido.cnpj
-              )}</div>
-              <div class="pedido-info"><strong>UF:</strong> ${pedido.uf}</div>
-              <div class="pedido-info"><strong>Cidade:</strong> ${
-                pedido.cidade
-              }</div>
-              <div class="pedido-info"><strong>Fornecedor:</strong> ${
-                pedido.fornecedor
-              }</div>
-              <div class="pedido-info"><strong>Valor Pedido:</strong> ${formatarMoeda(
-                pedido.valorped
-              )}</div>
-              <div class="pedido-info"><strong>Quantidade de Moedas:</strong> ${
-                pedido.qtmoedas
-              }</div>
-              <div class="pedido-info"><strong>Vendedor:</strong> ${
-                pedido.usuariofunc
-              }</div>
-              <div class="pedido-info"><strong>Data Lançamento:</strong> ${formatarData(
-                pedido.dtlanc
-              )}</div>
-              <div class="pedido-info"><strong>Distribuidora:</strong> ${
-                pedido.filial
-              }</div>
-              <button class="btn btn-success btn-approve mt-2" data-transacao="${
-                pedido.transacao
-              }">Aprovar</button>
-              <button class="btn btn-danger btn-reprovar mt-2" data-transacao="${
-                pedido.transacao
-              }">Reprovar</button>
-            `;
-            pendentePedidos.appendChild(pedidoElement);
-          });
-        } else {
-          pendentePedidos.innerHTML =
-            '<div class="alert alert-info">Não há pedidos pendentes no momento.</div>';
-        }
-      })
-      .catch((error) => {
-        console.error("Erro ao buscar pedidos pendentes:", error);
-        const pendentePedidos = document.getElementById("pendentePedidos");
-        pendentePedidos.innerHTML =
-          '<div class="alert alert-danger">Erro ao buscar pedidos pendentes.</div>';
-      });
   }
 
+  // Função para listar pedidos pendentes
+  function listarPedidosPendentes() {
+    fetchPedidos(
+      "https://sga.grupobrf1.com:10000/listarpedidosnaovalidados",
+      "pendentePedidos",
+      "Não há pedidos pendentes no momento.",
+      false
+    );
+  }
+
+  // Função para listar pedidos históricos (aprovados e negados)
   function listarPedidosHistorico() {
     listarPedidosAprovados();
     listarPedidosNegados();
   }
 
+  // Função para listar pedidos aprovados
   function listarPedidosAprovados() {
-    fetch("https://sga.grupobrf1.com:10000/listarsolicitacoesaprovadas", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        const aprovadosPedidos = document.getElementById("aprovadosPedidos");
-        aprovadosPedidos.innerHTML = "";
-
-        if (Array.isArray(data)) {
-          data.forEach((pedido) => {
-            const pedidoElement = document.createElement("div");
-            pedidoElement.className = "pedido-box";
-            pedidoElement.innerHTML = `
-              <div class="pedido-info"><strong>Transação:</strong> ${
-                pedido.transacao
-              }</div>
-              <div class="pedido-info"><strong>Cliente:</strong> ${
-                pedido.cliente
-              }</div>
-              <div class="pedido-info"><strong>CNPJ:</strong> ${formatarCNPJ(
-                pedido.cnpj
-              )}</div>
-              <div class="pedido-info"><strong>UF:</strong> ${pedido.uf}</div>
-              <div class="pedido-info"><strong>Cidade:</strong> ${
-                pedido.cidade
-              }</div>
-              <div class="pedido-info"><strong>Fornecedor:</strong> ${
-                pedido.fornecedor
-              }</div>
-              <div class="pedido-info"><strong>Valor Pedido:</strong> ${formatarMoeda(
-                pedido.valorped
-              )}</div>
-              <div class="pedido-info"><strong>Quantidade de Moedas:</strong> ${
-                pedido.qtmoedas
-              }</div>
-              <div class="pedido-info"><strong>Vendedor:</strong> ${
-                pedido.usuariofunc
-              }</div>
-              <div class="pedido-info"><strong>Data Validação:</strong> ${formatarData(
-                pedido.dtvalidacaofin
-              )}</div>
-              <div class="pedido-info"><strong>Usuário Libera:</strong> ${
-                pedido.usuariovalidacaofin
-              }</div>
-              <div class="pedido-info"><strong>Distribuidora:</strong> ${
-                pedido.filial
-              }</div>
-            `;
-            aprovadosPedidos.appendChild(pedidoElement);
-          });
-        }
-      });
+    fetchPedidos(
+      "https://sga.grupobrf1.com:10000/listarsolicitacoesaprovadas",
+      "aprovadosPedidos",
+      "Não há pedidos aprovados no momento.",
+      true
+    );
   }
 
+  // Função para listar pedidos negados
   function listarPedidosNegados() {
-    fetch("https://sga.grupobrf1.com:10000/listarsolicitacoesnegadas", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        const negadosPedidos = document.getElementById("negadosPedidos");
-        negadosPedidos.innerHTML = "";
+    fetchPedidos(
+      "https://sga.grupobrf1.com:10000/listarsolicitacoesnegadas",
+      "negadosPedidos",
+      "Não há pedidos reprovados no momento.",
+      true
+    );
+  }
 
-        if (Array.isArray(data)) {
-          data.forEach((pedido) => {
-            const pedidoElement = document.createElement("div");
-            pedidoElement.className = "pedido-box";
-            pedidoElement.innerHTML = `
-              <div class="pedido-info"><strong>Transação:</strong> ${
-                pedido.transacao
-              }</div>
-              <div class="pedido-info"><strong>Cliente:</strong> ${
-                pedido.cliente
-              }</div>
-              <div class="pedido-info"><strong>CNPJ:</strong> ${formatarCNPJ(
-                pedido.cnpj
-              )}</div>
-              <div class="pedido-info"><strong>UF:</strong> ${pedido.uf}</div>
-              <div class="pedido-info"><strong>Cidade:</strong> ${
-                pedido.cidade
-              }</div>
-              <div class="pedido-info"><strong>Fornecedor:</strong> ${
-                pedido.fornecedor
-              }</div>
-              <div class="pedido-info"><strong>Valor Pedido:</strong> ${formatarMoeda(
-                pedido.valorped
-              )}</div>
-              <div class="pedido-info"><strong>Quantidade de Moedas:</strong> ${
-                pedido.qtmoedas
-              }</div>
-              <div class="pedido-info"><strong>Vendedor:</strong> ${
-                pedido.usuariofunc
-              }</div>
-              <div class="pedido-info"><strong>Data Validação:</strong> ${formatarData(
-                pedido.dtvalidacaofin
-              )}</div>
-              <div class="pedido-info"><strong>Usuário Libera:</strong> ${
-                pedido.usuariovalidacaofin
-              }</div>
-              <div class="pedido-info"><strong>Distribuidora:</strong> ${
-                pedido.filial
-              }</div>
-            `;
-            negadosPedidos.appendChild(pedidoElement);
-          });
-        }
+  // Função genérica para buscar pedidos e renderizar na tela
+  function fetchPedidos(url, elementId, emptyMessage, incluirUsuarioLibera) {
+    fetch(url, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error("Erro ao buscar pedidos");
+        return response.json();
+      })
+      .then((data) =>
+        renderPedidos(data, elementId, emptyMessage, incluirUsuarioLibera)
+      )
+      .catch((error) => {
+        console.error("Erro ao buscar pedidos:", error);
+        document.getElementById(
+          elementId
+        ).innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
       });
   }
 
-  document.addEventListener("click", function (event) {
-    if (event.target.classList.contains("btn-approve")) {
+  // Função para renderizar os pedidos na tela
+  function renderPedidos(data, elementId, emptyMessage, incluirUsuarioLibera) {
+    const container = document.getElementById(elementId);
+    container.innerHTML = "";
+
+    if (Array.isArray(data) && data.length > 0) {
+      data.forEach((pedido) => {
+        const pedidoElement = document.createElement("div");
+        pedidoElement.className = "pedido-box";
+        pedidoElement.innerHTML = `
+          <div class="pedido-info"><strong>Transação:</strong> ${
+            pedido.transacao
+          }</div>
+          <div class="pedido-info"><strong>Cliente:</strong> ${
+            pedido.cliente
+          }</div>
+          <div class="pedido-info"><strong>CNPJ:</strong> ${formatarCNPJ(
+            pedido.cnpj
+          )}</div>
+          <div class="pedido-info"><strong>UF:</strong> ${pedido.uf}</div>
+          <div class="pedido-info"><strong>Cidade:</strong> ${
+            pedido.cidade
+          }</div>
+          <div class="pedido-info"><strong>Fornecedor:</strong> ${
+            pedido.fornecedor
+          }</div>
+          <div class="pedido-info"><strong>Valor Pedido:</strong> ${formatarMoeda(
+            pedido.valorped
+          )}</div>
+          <div class="pedido-info"><strong>Quantidade de Moedas:</strong> ${
+            pedido.qtmoedas
+          }</div>
+          <div class="pedido-info"><strong>Vendedor:</strong> ${
+            pedido.usuariofunc
+          }</div>
+          <div class="pedido-info"><strong>Data Lançamento:</strong> ${formatarData(
+            pedido.dtlanc
+          )}</div>
+          <div class="pedido-info"><strong>Distribuidora:</strong> ${
+            pedido.filial
+          }</div>
+          ${
+            incluirUsuarioLibera
+              ? `<div class="pedido-info"><strong>Data Validação:</strong> ${formatarData(
+                  pedido.dtvalidacaofin
+                )}</div>`
+              : ""
+          }
+          ${
+            incluirUsuarioLibera
+              ? `<div class="pedido-info"><strong>Usuário Libera:</strong> ${pedido.usuariovalidacaofin}</div>`
+              : ""
+          }
+          ${
+            elementId === "pendentePedidos"
+              ? `
+          <button class="btn btn-success btn-approve mt-2" data-transacao="${pedido.transacao}">Aprovar</button>
+          <button class="btn btn-danger btn-reprovar mt-2" data-transacao="${pedido.transacao}">Reprovar</button>
+          `
+              : ""
+          }
+        `;
+        container.appendChild(pedidoElement);
+      });
+    } else {
+      container.innerHTML = `<div class="alert alert-info">${emptyMessage}</div>`;
+    }
+  }
+
+  // Configura os eventos de clique para os botões de aprovação e reprovação
+  document.addEventListener("click", (event) => {
+    if (
+      event.target.classList.contains("btn-approve") ||
+      event.target.classList.contains("btn-reprovar")
+    ) {
       const pedidoBox = event.target.closest(".pedido-box");
-      mostrarModal("aprovar", pedidoBox, event.target);
-    } else if (event.target.classList.contains("btn-reprovar")) {
-      const pedidoBox = event.target.closest(".pedido-box");
-      mostrarModal("reprovar", pedidoBox, event.target);
+      const acao = event.target.classList.contains("btn-approve")
+        ? "aprovar"
+        : "reprovar";
+      mostrarModalConfirmacao(acao, pedidoBox, event.target);
     }
   });
 
-  function mostrarModal(acao, pedidoBox, button) {
-    document.getElementById("acaoModal").textContent =
-      acao === "aprovar" ? "aprovar" : "reprovar";
-
+  // Função para mostrar o modal de confirmação
+  function mostrarModalConfirmacao(acao, pedidoBox, button) {
+    document.getElementById("acaoModal").textContent = acao;
     document.getElementById("confirmaTransacao").textContent = pedidoBox
       .querySelector(".pedido-info:nth-child(1)")
       .textContent.split(": ")[1];
@@ -280,7 +223,7 @@ document.addEventListener("DOMContentLoaded", function () {
     );
     confirmacaoModal.show();
 
-    document.getElementById("confirmarPedidoBtn").onclick = function () {
+    document.getElementById("confirmarPedidoBtn").onclick = () => {
       confirmacaoModal.hide();
       atualizarStatusPedido(
         pedidoBox
@@ -291,25 +234,19 @@ document.addEventListener("DOMContentLoaded", function () {
       );
     };
 
-    document.getElementById("cancelarPedidoBtn").onclick = function () {
+    document.getElementById("cancelarPedidoBtn").onclick = () => {
       confirmacaoModal.hide();
     };
   }
 
+  // Função para atualizar o status do pedido
   function atualizarStatusPedido(transacao, status, button) {
     const payload = { transacao, status };
     console.log("Enviando requisição:", payload);
 
-    button.disabled = true;
-    const siblingButton =
-      button.nextElementSibling || button.previousElementSibling;
-    siblingButton.disabled = true;
+    desabilitarBotoes(button, true);
 
-    const loadingSpinner = document.createElement("div");
-    loadingSpinner.className = "loading-spinner";
-    button.parentNode.appendChild(loadingSpinner);
-
-    fetch(`https://sga.grupobrf1.com:10000/aprovarrejeitarpedido`, {
+    fetch("https://sga.grupobrf1.com:10000/aprovarrejeitarpedido", {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -317,79 +254,79 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       body: JSON.stringify(payload),
     })
-      .then(async (response) => {
-        const responseBody = await response.text();
-        let data;
-        try {
-          data = JSON.parse(responseBody);
-        } catch (e) {
-          data = { detail: responseBody };
-        }
-        return { status: response.status, body: data };
-      })
+      .then((response) => response.json())
       .then((data) => {
-        if (data.status !== 200) {
-          throw new Error(
-            data.body.detail || "Erro ao atualizar status do pedido"
-          );
-        }
-        console.log("Dados recebidos:", data.body);
+        if (!response.ok)
+          throw new Error(data.detail || "Erro ao atualizar status do pedido");
         mostrarMensagemStatus(
-          data.body.mensagem,
+          data.mensagem,
           status,
           transacao,
-          button
-            .closest(".pedido-box")
-            .querySelector(".pedido-info:nth-child(2)")
-            .textContent.split(": ")[1],
-          button
-            .closest(".pedido-box")
-            .querySelector(".pedido-info:nth-child(7)")
-            .textContent.split(": ")[1]
+          button.closest(".pedido-box")
         );
         removerPedidoDaTela(button);
       })
       .catch((error) => {
         console.error("Erro ao atualizar status do pedido:", error);
-        mostrarMensagemStatus(
-          `Erro: ${error.message}`,
-          false,
-          transacao,
-          "",
-          ""
-        );
+        mostrarMensagemStatus(`Erro: ${error.message}`, false, transacao);
         removerPedidoDaTela(button);
       })
-      .finally(() => {
-        loadingSpinner.remove();
-        button.disabled = false;
-        siblingButton.disabled = false;
-      });
+      .finally(() => desabilitarBotoes(button, false));
   }
 
-  function mostrarMensagemStatus(mensagem, status, transacao, cliente, valor) {
+  // Função para desabilitar/habilitar os botões de aprovação/reprovação
+  function desabilitarBotoes(button, desabilitar) {
+    button.disabled = desabilitar;
+    const siblingButton =
+      button.nextElementSibling || button.previousElementSibling;
+    siblingButton.disabled = desabilitar;
+
+    if (desabilitar) {
+      const loadingSpinner = document.createElement("div");
+      loadingSpinner.className = "loading-spinner";
+      button.parentNode.appendChild(loadingSpinner);
+    } else {
+      button.parentNode.querySelector(".loading-spinner").remove();
+    }
+  }
+
+  // Função para mostrar mensagens de status
+  function mostrarMensagemStatus(
+    mensagem,
+    status,
+    transacao,
+    pedidoBox = null
+  ) {
     mensagemStatus.className = `alert ${
       status ? "alert-success" : "alert-danger"
     }`;
+    const cliente = pedidoBox
+      ? pedidoBox
+          .querySelector(".pedido-info:nth-child(2)")
+          .textContent.split(": ")[1]
+      : "";
+    const valor = pedidoBox
+      ? pedidoBox
+          .querySelector(".pedido-info:nth-child(7)")
+          .textContent.split(": ")[1]
+      : "";
     mensagemStatus.textContent = `${mensagem} - Transação: ${transacao}, Cliente: ${cliente}, Valor: ${valor}`;
     mensagemStatus.classList.remove("d-none");
-    setTimeout(() => {
-      mensagemStatus.classList.add("d-none");
-    }, 10000); // Ocultar mensagem após 10 segundos
+    setTimeout(() => mensagemStatus.classList.add("d-none"), 10000);
   }
 
+  // Função para remover o pedido da tela
   function removerPedidoDaTela(button) {
     const pedidoBox = button.closest(".pedido-box");
     pedidoBox.style.opacity = 0;
-    setTimeout(() => {
-      pedidoBox.remove();
-    }, 1000);
+    setTimeout(() => pedidoBox.remove(), 1000);
   }
 
+  // Função para selecionar o item de menu
   function selecionarItemMenu(id) {
-    document.querySelectorAll(".nav-link").forEach((item) => {
-      item.classList.remove("active");
-    });
+    document
+      .querySelectorAll(".nav-link")
+      .forEach((item) => item.classList.remove("active"));
     document.getElementById(id).classList.add("active");
   }
 
@@ -410,13 +347,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function formatarData(data) {
     const date = new Date(data);
-    return date.toLocaleString("pt-BR");
+    return isNaN(date.getTime())
+      ? "Data Inválida"
+      : date.toLocaleString("pt-BR");
   }
 
-  // Atualizar lista de pedidos pendentes a cada 10 segundos
+  // Atualizar lista de pedidos pendentes e histórico a cada 10 segundos
   setInterval(listarPedidosPendentes, 10000);
   setInterval(listarPedidosHistorico, 10000);
 
   // Inicializar a seção de pedidos pendentes por padrão
-  listarPedidosPendentes();
+  mostrarSecaoPendente();
 });
