@@ -37,13 +37,10 @@ document.addEventListener("DOMContentLoaded", function () {
     })
       .then((response) => {
         if (response.status === 403) {
-          // Redirecionar para outra página em caso de erro 403
-          //alert('Você não deveria estar aqui!')
-          window.location.href = "pagina_erro_403.html"; // Substitua pelo caminho correto
+          window.location.href = "pagina_erro_403.html";
           return Promise.reject(new Error("Acesso proibido"));
         } else if (response.status === 404) {
-          // Tratar erro 404 (nenhum resultado)
-          return Promise.resolve([]); // Retorna um array vazio para indicar que não há dados
+          return Promise.resolve([]);
         } else if (!response.ok) {
           throw new Error("Erro ao buscar pedidos pendentes");
         }
@@ -226,19 +223,77 @@ document.addEventListener("DOMContentLoaded", function () {
 
   document.addEventListener("click", function (event) {
     if (event.target.classList.contains("btn-approve")) {
-      const transacao = event.target.dataset.transacao;
-      atualizarStatusPedido(transacao, true, event.target);
+      const pedidoBox = event.target.closest(".pedido-box");
+      mostrarModal("aprovar", pedidoBox, event.target);
     } else if (event.target.classList.contains("btn-reprovar")) {
-      const transacao = event.target.dataset.transacao;
-      atualizarStatusPedido(transacao, false, event.target);
+      const pedidoBox = event.target.closest(".pedido-box");
+      mostrarModal("reprovar", pedidoBox, event.target);
     }
   });
+
+  function mostrarModal(acao, pedidoBox, button) {
+    document.getElementById("acaoModal").textContent =
+      acao === "aprovar" ? "aprovar" : "reprovar";
+
+    document.getElementById("confirmaTransacao").textContent = pedidoBox
+      .querySelector(".pedido-info:nth-child(1)")
+      .textContent.split(": ")[1];
+    document.getElementById("confirmaCliente").textContent = pedidoBox
+      .querySelector(".pedido-info:nth-child(2)")
+      .textContent.split(": ")[1];
+    document.getElementById("confirmaCnpj").textContent = pedidoBox
+      .querySelector(".pedido-info:nth-child(3)")
+      .textContent.split(": ")[1];
+    document.getElementById("confirmaUf").textContent = pedidoBox
+      .querySelector(".pedido-info:nth-child(4)")
+      .textContent.split(": ")[1];
+    document.getElementById("confirmaCidade").textContent = pedidoBox
+      .querySelector(".pedido-info:nth-child(5)")
+      .textContent.split(": ")[1];
+    document.getElementById("confirmaFornecedor").textContent = pedidoBox
+      .querySelector(".pedido-info:nth-child(6)")
+      .textContent.split(": ")[1];
+    document.getElementById("confirmaValorPedido").textContent = pedidoBox
+      .querySelector(".pedido-info:nth-child(7)")
+      .textContent.split(": ")[1];
+    document.getElementById("confirmaQtMoedas").textContent = pedidoBox
+      .querySelector(".pedido-info:nth-child(8)")
+      .textContent.split(": ")[1];
+    document.getElementById("confirmaVendedor").textContent = pedidoBox
+      .querySelector(".pedido-info:nth-child(9)")
+      .textContent.split(": ")[1];
+    document.getElementById("confirmaDataLancamento").textContent = pedidoBox
+      .querySelector(".pedido-info:nth-child(10)")
+      .textContent.split(": ")[1];
+    document.getElementById("confirmaDistribuidora").textContent = pedidoBox
+      .querySelector(".pedido-info:nth-child(11)")
+      .textContent.split(": ")[1];
+
+    const confirmacaoModal = new bootstrap.Modal(
+      document.getElementById("confirmacaoModal")
+    );
+    confirmacaoModal.show();
+
+    document.getElementById("confirmarPedidoBtn").onclick = function () {
+      confirmacaoModal.hide();
+      atualizarStatusPedido(
+        pedidoBox
+          .querySelector(".pedido-info:nth-child(1)")
+          .textContent.split(": ")[1],
+        acao === "aprovar",
+        button
+      );
+    };
+
+    document.getElementById("cancelarPedidoBtn").onclick = function () {
+      confirmacaoModal.hide();
+    };
+  }
 
   function atualizarStatusPedido(transacao, status, button) {
     const payload = { transacao, status };
     console.log("Enviando requisição:", payload);
 
-    // Desabilitar botões e mostrar loading
     button.disabled = true;
     const siblingButton =
       button.nextElementSibling || button.previousElementSibling;
@@ -300,7 +355,6 @@ document.addEventListener("DOMContentLoaded", function () {
         removerPedidoDaTela(button);
       })
       .finally(() => {
-        // Remover loading e reabilitar botões
         loadingSpinner.remove();
         button.disabled = false;
         siblingButton.disabled = false;
