@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Função para listar pedidos pendentes
   function listarPedidosPendentes() {
     fetchPedidos(
-      "https://feira-api.grupobrf1.com/listarpedidosnaovalidados",
+      "https://api.grupobrf1.com:10000/listarpedidosnaovalidados",
       "pendentePedidos",
       "Não há pedidos pendentes no momento.",
       false
@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Função para listar pedidos aprovados
   function listarPedidosAprovados() {
     fetchPedidos(
-      "https://feira-api.grupobrf1.com/listarsolicitacoesaprovadas",
+      "https://api.grupobrf1.com:10000/listarsolicitacoesaprovadas",
       "aprovadosPedidos",
       "Não há pedidos aprovados no momento.",
       true
@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Função para listar pedidos negados
   function listarPedidosNegados() {
     fetchPedidos(
-      "https://feira-api.grupobrf1.com/listarsolicitacoesnegadas",
+      "https://api.grupobrf1.com:10000/listarsolicitacoesnegadas",
       "negadosPedidos",
       "Não há pedidos reprovados no momento.",
       true
@@ -249,7 +249,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     desabilitarBotoes(button, true);
 
-    fetch("https://feira-api.grupobrf1.com/aprovarrejeitarpedido", {
+    fetch("https://api.grupobrf1.com:10000/aprovarrejeitarpedido", {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
