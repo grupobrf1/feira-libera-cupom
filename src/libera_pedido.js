@@ -84,12 +84,18 @@ document.addEventListener("DOMContentLoaded", () => {
       headers: { Authorization: `Bearer ${accessToken}` },
     })
       .then((response) => {
+        if (response.status === 403) {
+          window.location.href = './pagina_erro_403.html';
+          return;
+        }
         if (!response.ok) throw new Error("Erro ao buscar pedidos");
         return response.json();
       })
-      .then((data) =>
-        renderPedidos(data, elementId, emptyMessage, incluirUsuarioLibera)
-      )
+      .then((data) => {
+        if (data) {
+          renderPedidos(data, elementId, emptyMessage, incluirUsuarioLibera);
+        }
+      })
       .catch((error) => {
         console.error("Erro ao buscar pedidos:", error);
         document.getElementById(
@@ -97,6 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ).innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
       });
   }
+  
 
   // Função para renderizar os pedidos na tela
   function renderPedidos(data, elementId, emptyMessage, incluirUsuarioLibera) {
