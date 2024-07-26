@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
     })
       .then((response) => {
         if (response.status === 403) {
-          window.location.href = './pagina_erro_403.html';
+          window.location.href = "./pagina_erro_403.html";
           return;
         }
         if (!response.ok) throw new Error("Erro ao buscar pedidos");
@@ -103,7 +103,6 @@ document.addEventListener("DOMContentLoaded", () => {
         ).innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
       });
   }
-  
 
   // Função para renderizar os pedidos na tela
   function renderPedidos(data, elementId, emptyMessage, incluirUsuarioLibera) {
@@ -264,10 +263,17 @@ document.addEventListener("DOMContentLoaded", () => {
       },
       body: JSON.stringify(payload),
     })
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          return response.json().then((data) => {
+            throw new Error(
+              data.detail || "Erro ao atualizar status do pedido"
+            );
+          });
+        }
+        return response.json();
+      })
       .then((data) => {
-        if (!response.ok)
-          throw new Error(data.detail || "Erro ao atualizar status do pedido");
         mostrarMensagemStatus(
           data.mensagem,
           status,
@@ -279,7 +285,6 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch((error) => {
         console.error("Erro ao atualizar status do pedido:", error);
         mostrarMensagemStatus(`Erro: ${error.message}`, false, transacao);
-        removerPedidoDaTela(button);
       })
       .finally(() => desabilitarBotoes(button, false));
   }
