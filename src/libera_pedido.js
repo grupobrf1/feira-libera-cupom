@@ -6,9 +6,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const historicoSection = document.getElementById("historico-section");
   const mensagemStatus = document.getElementById("mensagemStatus");
   const tituloBemVindo = document.getElementById("tituloBemVindo");
+  const notificationBadge = document.getElementById("notificationBadge");
 
-  // Atualiza o título de boas-vindas com o nome do usuário
-  tituloBemVindo.textContent = `Bem-vindo, ${userName}`;
+  // Verifica se o elemento existe antes de tentar definir o texto
+  if (tituloBemVindo) {
+    tituloBemVindo.textContent = `Bem-vindo, ${userName}`;
+  }
 
   // Configura o botão de logout
   document.getElementById("logoutBtn").addEventListener("click", () => {
@@ -28,16 +31,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Função para mostrar a seção de pedidos pendentes
   function mostrarSecaoPendente() {
-    pendenteSection.classList.remove("d-none");
-    historicoSection.classList.add("d-none");
+    if (pendenteSection) pendenteSection.classList.remove("d-none");
+    if (historicoSection) historicoSection.classList.add("d-none");
     listarPedidosPendentes();
     selecionarItemMenu("pendente-tab");
   }
 
   // Função para mostrar a seção de histórico de pedidos
   function mostrarSecaoHistorico() {
-    pendenteSection.classList.add("d-none");
-    historicoSection.classList.remove("d-none");
+    if (pendenteSection) pendenteSection.classList.add("d-none");
+    if (historicoSection) historicoSection.classList.remove("d-none");
     listarPedidosHistorico();
     selecionarItemMenu("historico-tab");
   }
@@ -98,15 +101,18 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .catch((error) => {
         console.error("Erro ao buscar pedidos:", error);
-        document.getElementById(
-          elementId
-        ).innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+        const element = document.getElementById(elementId);
+        if (element) {
+          element.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+        }
       });
   }
 
   // Função para renderizar os pedidos na tela
   function renderPedidos(data, elementId, emptyMessage, incluirUsuarioLibera) {
     const container = document.getElementById(elementId);
+    if (!container) return;
+
     container.innerHTML = "";
 
     if (Array.isArray(data) && data.length > 0) {
@@ -168,8 +174,16 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         container.appendChild(pedidoElement);
       });
+
+      // Atualiza o conteúdo do badge
+      if (notificationBadge) {
+        notificationBadge.textContent = data.length;
+      }
     } else {
       container.innerHTML = `<div class="alert alert-info">${emptyMessage}</div>`;
+      if (notificationBadge) {
+        notificationBadge.textContent = "0";
+      }
     }
   }
 
@@ -186,12 +200,15 @@ document.addEventListener("DOMContentLoaded", () => {
       mostrarModalConfirmacao(acao, pedidoBox, event.target);
     }
   });
+
   // Função para mostrar o modal de confirmação
   function mostrarModalConfirmacao(acao, pedidoBox, button) {
     const acaoElement = document.getElementById("acaoModal");
-    acaoElement.textContent = acao;
-    acaoElement.className =
-      acao === "aprovar" ? "text-success fw-bold" : "text-danger fw-bold";
+    if (acaoElement) {
+      acaoElement.textContent = acao;
+      acaoElement.className =
+        acao === "aprovar" ? "text-success fw-bold" : "text-danger fw-bold";
+    }
 
     document.getElementById("confirmaTransacao").textContent = pedidoBox
       .querySelector(".pedido-info:nth-child(1)")
@@ -294,14 +311,19 @@ document.addEventListener("DOMContentLoaded", () => {
     button.disabled = desabilitar;
     const siblingButton =
       button.nextElementSibling || button.previousElementSibling;
-    siblingButton.disabled = desabilitar;
+    if (siblingButton) {
+      siblingButton.disabled = desabilitar;
+    }
 
     if (desabilitar) {
       const loadingSpinner = document.createElement("div");
       loadingSpinner.className = "loading-spinner";
       button.parentNode.appendChild(loadingSpinner);
     } else {
-      button.parentNode.querySelector(".loading-spinner").remove();
+      const spinner = button.parentNode.querySelector(".loading-spinner");
+      if (spinner) {
+        spinner.remove();
+      }
     }
   }
 
@@ -312,29 +334,33 @@ document.addEventListener("DOMContentLoaded", () => {
     transacao,
     pedidoBox = null
   ) {
-    mensagemStatus.className = `alert ${
-      status ? "alert-success" : "alert-danger"
-    }`;
-    const cliente = pedidoBox
-      ? pedidoBox
-          .querySelector(".pedido-info:nth-child(2)")
-          .textContent.split(": ")[1]
-      : "";
-    const valor = pedidoBox
-      ? pedidoBox
-          .querySelector(".pedido-info:nth-child(7)")
-          .textContent.split(": ")[1]
-      : "";
-    mensagemStatus.textContent = `${mensagem} - Transação: ${transacao}, Cliente: ${cliente}, Valor: ${valor}`;
-    mensagemStatus.classList.remove("d-none");
-    setTimeout(() => mensagemStatus.classList.add("d-none"), 10000);
+    if (mensagemStatus) {
+      mensagemStatus.className = ` position-fixed alert ${
+        status ? "alert-success" : "alert-danger"
+      }`;
+      const cliente = pedidoBox
+        ? pedidoBox
+            .querySelector(".pedido-info:nth-child(2)")
+            .textContent.split(": ")[1]
+        : "";
+      const valor = pedidoBox
+        ? pedidoBox
+            .querySelector(".pedido-info:nth-child(7)")
+            .textContent.split(": ")[1]
+        : "";
+      mensagemStatus.textContent = `${mensagem} - Transação: ${transacao}, Cliente: ${cliente}, Valor: ${valor}`;
+      mensagemStatus.classList.remove("d-none");
+      setTimeout(() => mensagemStatus.classList.add("d-none"), 10000);
+    }
   }
 
   // Função para remover o pedido da tela
   function removerPedidoDaTela(button) {
     const pedidoBox = button.closest(".pedido-box");
-    pedidoBox.style.opacity = 0;
-    setTimeout(() => pedidoBox.remove(), 1000);
+    if (pedidoBox) {
+      pedidoBox.style.opacity = 0;
+      setTimeout(() => pedidoBox.remove(), 1000);
+    }
   }
 
   // Função para selecionar o item de menu
