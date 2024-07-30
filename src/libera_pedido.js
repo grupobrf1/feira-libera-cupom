@@ -29,6 +29,14 @@ document.addEventListener("DOMContentLoaded", () => {
     mostrarSecaoHistorico();
   });
 
+  // Adiciona evento de input no campo de busca
+  const buscaFornecedor = document.getElementById("buscaFornecedor");
+  if (buscaFornecedor) {
+    buscaFornecedor.addEventListener("input", () => {
+      listarPedidosHistorico(buscaFornecedor.value);
+    });
+  }
+
   // Função para mostrar a seção de pedidos pendentes
   function mostrarSecaoPendente() {
     if (pendenteSection) pendenteSection.classList.remove("d-none");
@@ -41,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function mostrarSecaoHistorico() {
     if (pendenteSection) pendenteSection.classList.add("d-none");
     if (historicoSection) historicoSection.classList.remove("d-none");
-    listarPedidosHistorico();
+    listarPedidosHistorico(buscaFornecedor.value);
     selecionarItemMenu("historico-tab");
   }
 
@@ -56,33 +64,35 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Função para listar pedidos históricos (aprovados e negados)
-  function listarPedidosHistorico() {
-    listarPedidosAprovados();
-    listarPedidosNegados();
+  function listarPedidosHistorico(fornecedor = "") {
+    listarPedidosAprovados(fornecedor);
+    listarPedidosNegados(fornecedor);
   }
 
   // Função para listar pedidos aprovados
-  function listarPedidosAprovados() {
+  function listarPedidosAprovados(fornecedor) {
     fetchPedidos(
       "https://api.grupobrf1.com:10000/listarsolicitacoesaprovadas",
       "aprovadosPedidos",
       "Não há pedidos aprovados no momento.",
-      true
+      true,
+      fornecedor
     );
   }
 
   // Função para listar pedidos negados
-  function listarPedidosNegados() {
+  function listarPedidosNegados(fornecedor) {
     fetchPedidos(
       "https://api.grupobrf1.com:10000/listarsolicitacoesnegadas",
       "negadosPedidos",
       "Não há pedidos reprovados no momento.",
-      true
+      true,
+      fornecedor
     );
   }
 
   // Função genérica para buscar pedidos e renderizar na tela
-  function fetchPedidos(url, elementId, emptyMessage, incluirUsuarioLibera) {
+  function fetchPedidos(url, elementId, emptyMessage, incluirUsuarioLibera, fornecedor = "") {
     fetch(url, {
       headers: { Authorization: `Bearer ${accessToken}` },
     })
@@ -96,7 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .then((data) => {
         if (data) {
-          renderPedidos(data, elementId, emptyMessage, incluirUsuarioLibera);
+          renderPedidos(data, elementId, emptyMessage, incluirUsuarioLibera, fornecedor);
         }
       })
       .catch((error) => {
@@ -109,75 +119,64 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Função para renderizar os pedidos na tela
-  function renderPedidos(data, elementId, emptyMessage, incluirUsuarioLibera) {
+  function renderPedidos(data, elementId, emptyMessage, incluirUsuarioLibera, fornecedor) {
     const container = document.getElementById(elementId);
     if (!container) return;
 
     container.innerHTML = "";
 
     if (Array.isArray(data) && data.length > 0) {
-      data.forEach((pedido) => {
-        const pedidoElement = document.createElement("div");
-        pedidoElement.className = "pedido-box";
-        pedidoElement.innerHTML = `
-          <div class="pedido-info"><strong>Transação:</strong> ${
-            pedido.transacao
-          }</div>
-          <div class="pedido-info"><strong>Cliente:</strong> ${
-            pedido.cliente
-          }</div>
-          <div class="pedido-info"><strong>CNPJ:</strong> ${formatarCNPJ(
-            pedido.cnpj
-          )}</div>
-          <div class="pedido-info"><strong>UF:</strong> ${pedido.uf}</div>
-          <div class="pedido-info"><strong>Cidade:</strong> ${
-            pedido.cidade
-          }</div>
-          <div class="pedido-info"><strong>Fornecedor:</strong> ${
-            pedido.fornecedor
-          }</div>
-          <div class="pedido-info"><strong>Valor Pedido:</strong> ${formatarMoeda(
-            pedido.valorped
-          )}</div>
-          <div class="pedido-info"><strong>Quantidade de Moedas:</strong> ${
-            pedido.qtmoedas
-          }</div>
-          <div class="pedido-info"><strong>Vendedor:</strong> ${
-            pedido.usuariofunc
-          }</div>
-          <div class="pedido-info"><strong>Data Lançamento:</strong> ${formatarData(
-            pedido.dtlanc
-          )}</div>
-          <div class="pedido-info"><strong>Distribuidora:</strong> ${
-            pedido.filial
-          }</div>
-          ${
-            incluirUsuarioLibera
-              ? `<div class="pedido-info"><strong>Data Validação:</strong> ${formatarData(
-                  pedido.dtvalidacaofin
-                )}</div>`
-              : ""
-          }
-          ${
-            incluirUsuarioLibera
-              ? `<div class="pedido-info"><strong>Usuário Libera:</strong> ${pedido.usuariovalidacaofin}</div>`
-              : ""
-          }
-          ${
-            elementId === "pendentePedidos"
-              ? `
-          <button class="btn btn-success btn-approve mt-2" data-transacao="${pedido.transacao}">Aprovar</button>
-          <button class="btn btn-danger btn-reprovar mt-2" data-transacao="${pedido.transacao}">Reprovar</button>
-          `
-              : ""
-          }
-        `;
-        container.appendChild(pedidoElement);
-      });
+      const pedidosFiltrados = data.filter(pedido => 
+        pedido.fornecedor.toLowerCase().includes(fornecedor.toLowerCase())
+      );
 
-      // Atualiza o conteúdo do badge
-      if (notificationBadge) {
-        notificationBadge.textContent = data.length;
+      if (pedidosFiltrados.length > 0) {
+        pedidosFiltrados.forEach((pedido) => {
+          const pedidoElement = document.createElement("div");
+          pedidoElement.className = "pedido-box";
+          pedidoElement.innerHTML = `
+            <div class="pedido-info"><strong>Transação:</strong> ${pedido.transacao}</div>
+            <div class="pedido-info"><strong>Cliente:</strong> ${pedido.cliente}</div>
+            <div class="pedido-info"><strong>CNPJ:</strong> ${formatarCNPJ(pedido.cnpj)}</div>
+            <div class="pedido-info"><strong>UF:</strong> ${pedido.uf}</div>
+            <div class="pedido-info"><strong>Cidade:</strong> ${pedido.cidade}</div>
+            <div class="pedido-info"><strong>Fornecedor:</strong> ${pedido.fornecedor}</div>
+            <div class="pedido-info"><strong>Valor Pedido:</strong> ${formatarMoeda(pedido.valorped)}</div>
+            <div class="pedido-info"><strong>Quantidade de Moedas:</strong> ${pedido.qtmoedas}</div>
+            <div class="pedido-info"><strong>Vendedor:</strong> ${pedido.usuariofunc}</div>
+            <div class="pedido-info"><strong>Data Lançamento:</strong> ${formatarData(pedido.dtlanc)}</div>
+            <div class="pedido-info"><strong>Distribuidora:</strong> ${pedido.filial}</div>
+            ${
+              incluirUsuarioLibera
+                ? `<div class="pedido-info"><strong>Data Validação:</strong> ${formatarData(pedido.dtvalidacaofin)}</div>`
+                : ""
+            }
+            ${
+              incluirUsuarioLibera
+                ? `<div class="pedido-info"><strong>Usuário Libera:</strong> ${pedido.usuariovalidacaofin}</div>`
+                : ""
+            }
+            ${
+              elementId === "pendentePedidos"
+                ? `
+            <button class="btn btn-success btn-approve mt-2" data-transacao="${pedido.transacao}">Aprovar</button>
+            <button class="btn btn-danger btn-reprovar mt-2" data-transacao="${pedido.transacao}">Reprovar</button>
+            `
+                : ""
+            }
+          `;
+          container.appendChild(pedidoElement);
+        });
+
+        // Atualiza o conteúdo do badge
+        if (notificationBadge) {
+          notificationBadge.textContent = pedidosFiltrados.length;
+        }
+      } else {
+        container.innerHTML = `<div class="alert alert-info">${emptyMessage}</div>`;
+        if (notificationBadge) {
+          notificationBadge.textContent = "0";
+        }
       }
     } else {
       container.innerHTML = `<div class="alert alert-info">${emptyMessage}</div>`;
@@ -395,7 +394,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Atualizar lista de pedidos pendentes e histórico a cada 10 segundos
   setInterval(listarPedidosPendentes, 10000);
-  setInterval(listarPedidosHistorico, 10000);
+  setInterval(() => listarPedidosHistorico(buscaFornecedor.value), 10000);
 
   // Inicializar a seção de pedidos pendentes por padrão
   mostrarSecaoPendente();
