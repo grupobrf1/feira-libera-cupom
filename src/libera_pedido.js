@@ -92,7 +92,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Função genérica para buscar pedidos e renderizar na tela
-  function fetchPedidos(url, elementId, emptyMessage, incluirUsuarioLibera, fornecedor = "") {
+  function fetchPedidos(
+    url,
+    elementId,
+    emptyMessage,
+    incluirUsuarioLibera,
+    fornecedor = ""
+  ) {
     fetch(url, {
       headers: { Authorization: `Bearer ${accessToken}` },
     })
@@ -101,32 +107,55 @@ document.addEventListener("DOMContentLoaded", () => {
           window.location.href = "./pagina_erro_403.html";
           return;
         }
+        if (response.status === 404) {
+          return { noData: true };
+        }
         if (!response.ok) throw new Error("Erro ao buscar pedidos");
         return response.json();
       })
       .then((data) => {
-        if (data) {
-          renderPedidos(data, elementId, emptyMessage, incluirUsuarioLibera, fornecedor);
+        if (data.noData) {
+          renderPedidos(
+            [],
+            elementId,
+            emptyMessage,
+            incluirUsuarioLibera,
+            fornecedor
+          );
+        } else if (data) {
+          renderPedidos(
+            data,
+            elementId,
+            emptyMessage,
+            incluirUsuarioLibera,
+            fornecedor
+          );
         }
       })
       .catch((error) => {
         console.error("Erro ao buscar pedidos:", error);
         const element = document.getElementById(elementId);
         if (element) {
-          element.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+          element.innerHTML = `<div class="alert alert-danger">Erro ao buscar pedidos. Tente novamente mais tarde.</div>`;
         }
       });
   }
 
   // Função para renderizar os pedidos na tela
-  function renderPedidos(data, elementId, emptyMessage, incluirUsuarioLibera, fornecedor) {
+  function renderPedidos(
+    data,
+    elementId,
+    emptyMessage,
+    incluirUsuarioLibera,
+    fornecedor
+  ) {
     const container = document.getElementById(elementId);
     if (!container) return;
 
     container.innerHTML = "";
 
     if (Array.isArray(data) && data.length > 0) {
-      const pedidosFiltrados = data.filter(pedido => 
+      const pedidosFiltrados = data.filter((pedido) =>
         pedido.fornecedor.toLowerCase().includes(fornecedor.toLowerCase())
       );
 
@@ -135,36 +164,58 @@ document.addEventListener("DOMContentLoaded", () => {
           const pedidoElement = document.createElement("div");
           pedidoElement.className = "pedido-box";
           pedidoElement.innerHTML = `
-            <div class="pedido-info"><strong>Transação:</strong> ${pedido.transacao}</div>
-            <div class="pedido-info"><strong>Cliente:</strong> ${pedido.cliente}</div>
-            <div class="pedido-info"><strong>CNPJ:</strong> ${formatarCNPJ(pedido.cnpj)}</div>
-            <div class="pedido-info"><strong>UF:</strong> ${pedido.uf}</div>
-            <div class="pedido-info"><strong>Cidade:</strong> ${pedido.cidade}</div>
-            <div class="pedido-info"><strong>Fornecedor:</strong> ${pedido.fornecedor}</div>
-            <div class="pedido-info"><strong>Valor Pedido:</strong> ${formatarMoeda(pedido.valorped)}</div>
-            <div class="pedido-info"><strong>Quantidade de Moedas:</strong> ${pedido.qtmoedas}</div>
-            <div class="pedido-info"><strong>Vendedor:</strong> ${pedido.usuariofunc}</div>
-            <div class="pedido-info"><strong>Data Lançamento:</strong> ${formatarData(pedido.dtlanc)}</div>
-            <div class="pedido-info"><strong>Distribuidora:</strong> ${pedido.filial}</div>
-            ${
-              incluirUsuarioLibera
-                ? `<div class="pedido-info"><strong>Data Validação:</strong> ${formatarData(pedido.dtvalidacaofin)}</div>`
-                : ""
-            }
-            ${
-              incluirUsuarioLibera
-                ? `<div class="pedido-info"><strong>Usuário Libera:</strong> ${pedido.usuariovalidacaofin}</div>`
-                : ""
-            }
-            ${
-              elementId === "pendentePedidos"
-                ? `
-            <button class="btn btn-success btn-approve mt-2" data-transacao="${pedido.transacao}">Aprovar</button>
-            <button class="btn btn-danger btn-reprovar mt-2" data-transacao="${pedido.transacao}">Reprovar</button>
-            `
-                : ""
-            }
-          `;
+          <div class="pedido-info"><strong>Transação:</strong> ${
+            pedido.transacao
+          }</div>
+          <div class="pedido-info"><strong>Cliente:</strong> ${
+            pedido.cliente
+          }</div>
+          <div class="pedido-info"><strong>CNPJ:</strong> ${formatarCNPJ(
+            pedido.cnpj
+          )}</div>
+          <div class="pedido-info"><strong>UF:</strong> ${pedido.uf}</div>
+          <div class="pedido-info"><strong>Cidade:</strong> ${
+            pedido.cidade
+          }</div>
+          <div class="pedido-info"><strong>Fornecedor:</strong> ${
+            pedido.fornecedor
+          }</div>
+          <div class="pedido-info"><strong>Valor Pedido:</strong> ${formatarMoeda(
+            pedido.valorped
+          )}</div>
+          <div class="pedido-info"><strong>Quantidade de Moedas:</strong> ${
+            pedido.qtmoedas
+          }</div>
+          <div class="pedido-info"><strong>Vendedor:</strong> ${
+            pedido.usuariofunc
+          }</div>
+          <div class="pedido-info"><strong>Data Lançamento:</strong> ${formatarData(
+            pedido.dtlanc
+          )}</div>
+          <div class="pedido-info"><strong>Distribuidora:</strong> ${
+            pedido.filial
+          }</div>
+          ${
+            incluirUsuarioLibera
+              ? `<div class="pedido-info"><strong>Data Validação:</strong> ${formatarData(
+                  pedido.dtvalidacaofin
+                )}</div>`
+              : ""
+          }
+          ${
+            incluirUsuarioLibera
+              ? `<div class="pedido-info"><strong>Usuário Libera:</strong> ${pedido.usuariovalidacaofin}</div>`
+              : ""
+          }
+          ${
+            elementId === "pendentePedidos"
+              ? `
+          <button class="btn btn-success btn-approve mt-2" data-transacao="${pedido.transacao}">Aprovar</button>
+          <button class="btn btn-danger btn-reprovar mt-2" data-transacao="${pedido.transacao}">Reprovar</button>
+          `
+              : ""
+          }
+        `;
           container.appendChild(pedidoElement);
         });
 
