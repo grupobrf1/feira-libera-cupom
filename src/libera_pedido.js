@@ -2,34 +2,35 @@ document.addEventListener("DOMContentLoaded", () => {
   const accessToken = localStorage.getItem("accessToken");
   const userName = localStorage.getItem("userName");
 
-  const pendenteSection = document.getElementById("pendente-section");
+  const pendenteFinanceiroSection = document.getElementById("pendente-financeiro-section");
+  const pendenteComercialSection = document.getElementById("pendente-comercial-section");
   const historicoSection = document.getElementById("historico-section");
   const mensagemStatus = document.getElementById("mensagemStatus");
   const tituloBemVindo = document.getElementById("tituloBemVindo");
   const notificationBadge = document.getElementById("notificationBadge");
 
-  // Verifica se o elemento existe antes de tentar definir o texto
   if (tituloBemVindo) {
     tituloBemVindo.textContent = `Bem-vindo, ${userName}`;
   }
 
-  // Configura o botão de logout
   document.getElementById("logoutBtn").addEventListener("click", () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("userName");
     window.location.href = "./index.html";
   });
 
-  // Configura os tabs de navegação
-  document.getElementById("pendente-tab").addEventListener("click", () => {
-    mostrarSecaoPendente();
+  document.getElementById("pendente-financeiro-tab").addEventListener("click", () => {
+    mostrarSecaoPendenteFinanceiro();
+  });
+
+  document.getElementById("pendente-comercial-tab").addEventListener("click", () => {
+    mostrarSecaoPendenteComercial();
   });
 
   document.getElementById("historico-tab").addEventListener("click", () => {
     mostrarSecaoHistorico();
   });
 
-  // Adiciona evento de input no campo de busca
   const buscaFornecedor = document.getElementById("buscaFornecedor");
   if (buscaFornecedor) {
     buscaFornecedor.addEventListener("input", () => {
@@ -37,39 +38,53 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Função para mostrar a seção de pedidos pendentes
-  function mostrarSecaoPendente() {
-    if (pendenteSection) pendenteSection.classList.remove("d-none");
+  function mostrarSecaoPendenteFinanceiro() {
+    if (pendenteFinanceiroSection) pendenteFinanceiroSection.classList.remove("d-none");
+    if (pendenteComercialSection) pendenteComercialSection.classList.add("d-none");
     if (historicoSection) historicoSection.classList.add("d-none");
-    listarPedidosPendentes();
-    selecionarItemMenu("pendente-tab");
+    listarPedidosPendentesFinanceiro();
+    selecionarItemMenu("pendente-financeiro-tab");
   }
 
-  // Função para mostrar a seção de histórico de pedidos
+  function mostrarSecaoPendenteComercial() {
+    if (pendenteFinanceiroSection) pendenteFinanceiroSection.classList.add("d-none");
+    if (pendenteComercialSection) pendenteComercialSection.classList.remove("d-none");
+    if (historicoSection) historicoSection.classList.add("d-none");
+    listarPedidosPendentesComercial();
+    selecionarItemMenu("pendente-comercial-tab");
+  }
+
   function mostrarSecaoHistorico() {
-    if (pendenteSection) pendenteSection.classList.add("d-none");
+    if (pendenteFinanceiroSection) pendenteFinanceiroSection.classList.add("d-none");
+    if (pendenteComercialSection) pendenteComercialSection.classList.add("d-none");
     if (historicoSection) historicoSection.classList.remove("d-none");
     listarPedidosHistorico(buscaFornecedor.value);
     selecionarItemMenu("historico-tab");
   }
 
-  // Função para listar pedidos pendentes
-  function listarPedidosPendentes() {
+  function listarPedidosPendentesFinanceiro() {
     fetchPedidos(
-      "https://api.grupobrf1.com:10000/listarpedidosnaovalidados",
-      "pendentePedidos",
-      "Não há pedidos pendentes no momento.",
+      "https://api.grupobrf1.com:10000/listarpedidosnaovalidadosfinanceiro",
+      "pendentePedidosFinanceiro",
+      "Não há pedidos pendentes no momento (Financeiro).",
       false
     );
   }
 
-  // Função para listar pedidos históricos (aprovados e negados)
+  function listarPedidosPendentesComercial() {
+    fetchPedidos(
+      "https://api.grupobrf1.com:10000/listarpedidosnaovalidadoscomercial",
+      "pendentePedidosComercial",
+      "Não há pedidos pendentes no momento (Comercial).",
+      false
+    );
+  }
+
   function listarPedidosHistorico(fornecedor = "") {
     listarPedidosAprovados(fornecedor);
     listarPedidosNegados(fornecedor);
   }
 
-  // Função para listar pedidos aprovados
   function listarPedidosAprovados(fornecedor) {
     fetchPedidos(
       "https://api.grupobrf1.com:10000/listarsolicitacoesaprovadas",
@@ -80,7 +95,6 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
-  // Função para listar pedidos negados
   function listarPedidosNegados(fornecedor) {
     fetchPedidos(
       "https://api.grupobrf1.com:10000/listarsolicitacoesnegadas",
@@ -91,7 +105,6 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
-  // Função genérica para buscar pedidos e renderizar na tela
   function fetchPedidos(
     url,
     elementId,
@@ -141,7 +154,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   }
 
-  // Função para renderizar os pedidos na tela
   function renderPedidos(
     data,
     elementId,
@@ -198,17 +210,18 @@ document.addEventListener("DOMContentLoaded", () => {
           ${
             incluirUsuarioLibera
               ? `<div class="pedido-info"><strong>Data Validação:</strong> ${formatarData(
-                  pedido.dtvalidacaofin
+                  pedido.dtvalidacaocom
                 )}</div>`
               : ""
           }
           ${
             incluirUsuarioLibera
-              ? `<div class="pedido-info"><strong>Usuário Libera:</strong> ${pedido.usuariovalidacaofin}</div>`
+              ? `<div class="pedido-info"><strong>Usuário Libera:</strong> ${pedido.usuariovalidacaocom}</div>`
               : ""
           }
           ${
-            elementId === "pendentePedidos"
+            elementId === "pendentePedidosFinanceiro" ||
+            elementId === "pendentePedidosComercial"
               ? `
           <button class="btn btn-success btn-approve mt-2" data-transacao="${pedido.transacao}">Aprovar</button>
           <button class="btn btn-danger btn-reprovar mt-2" data-transacao="${pedido.transacao}">Reprovar</button>
@@ -219,7 +232,6 @@ document.addEventListener("DOMContentLoaded", () => {
           container.appendChild(pedidoElement);
         });
 
-        // Atualiza o conteúdo do badge
         if (notificationBadge) {
           notificationBadge.textContent = pedidosFiltrados.length;
         }
@@ -237,7 +249,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Configura os eventos de clique para os botões de aprovação e reprovação
   document.addEventListener("click", (event) => {
     if (
       event.target.classList.contains("btn-approve") ||
@@ -251,7 +262,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Função para mostrar o modal de confirmação
   function mostrarModalConfirmacao(acao, pedidoBox, button) {
     const acaoElement = document.getElementById("acaoModal");
     if (acaoElement) {
@@ -301,12 +311,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("confirmarPedidoBtn").onclick = () => {
       confirmacaoModal.hide();
+      const isFinanceiro = button.closest("#pendentePedidosFinanceiro");
+      const endpoint = isFinanceiro
+        ? "https://api.grupobrf1.com:10000/aprovarrejeitarpedidofinanceiro"
+        : "https://api.grupobrf1.com:10000/aprovarrejeitarpedidocomercial";
       atualizarStatusPedido(
         pedidoBox
           .querySelector(".pedido-info:nth-child(1)")
           .textContent.split(": ")[1],
         acao === "aprovar",
-        button
+        button,
+        endpoint
       );
     };
 
@@ -315,14 +330,13 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  // Função para atualizar o status do pedido
-  function atualizarStatusPedido(transacao, status, button) {
+  function atualizarStatusPedido(transacao, status, button, endpoint) {
     const payload = { transacao, status };
     console.log("Enviando requisição:", payload);
 
     desabilitarBotoes(button, true);
 
-    fetch("https://api.grupobrf1.com:10000/aprovarrejeitarpedido", {
+    fetch(endpoint, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -356,7 +370,6 @@ document.addEventListener("DOMContentLoaded", () => {
       .finally(() => desabilitarBotoes(button, false));
   }
 
-  // Função para desabilitar/habilitar os botões de aprovação/reprovação
   function desabilitarBotoes(button, desabilitar) {
     button.disabled = desabilitar;
     const siblingButton =
@@ -377,7 +390,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Função para mostrar mensagens de status
   function mostrarMensagemStatus(
     mensagem,
     status,
@@ -404,7 +416,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Função para remover o pedido da tela
   function removerPedidoDaTela(button) {
     const pedidoBox = button.closest(".pedido-box");
     if (pedidoBox) {
@@ -413,7 +424,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Função para selecionar o item de menu
   function selecionarItemMenu(id) {
     document
       .querySelectorAll(".nav-link")
@@ -421,7 +431,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById(id).classList.add("active");
   }
 
-  // Funções de formatação
   function formatarCNPJ(cnpj) {
     return cnpj.replace(
       /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
@@ -443,10 +452,8 @@ document.addEventListener("DOMContentLoaded", () => {
       : date.toLocaleString("pt-BR");
   }
 
-  // Atualizar lista de pedidos pendentes e histórico a cada 10 segundos
-  setInterval(listarPedidosPendentes, 10000);
+  setInterval(listarPedidosPendentesFinanceiro, 10000);
   setInterval(() => listarPedidosHistorico(buscaFornecedor.value), 10000);
 
-  // Inicializar a seção de pedidos pendentes por padrão
-  mostrarSecaoPendente();
+  mostrarSecaoPendenteFinanceiro();
 });
