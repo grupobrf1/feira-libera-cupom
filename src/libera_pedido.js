@@ -9,6 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const tituloBemVindo = document.getElementById("tituloBemVindo");
   const notificationBadge = document.getElementById("notificationBadge");
 
+  let financeiroInterval, comercialInterval, historicoInterval;
+
   if (tituloBemVindo) {
     tituloBemVindo.textContent = `Bem-vindo, ${userName}`;
   }
@@ -42,6 +44,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (pendenteFinanceiroSection) pendenteFinanceiroSection.classList.remove("d-none");
     if (pendenteComercialSection) pendenteComercialSection.classList.add("d-none");
     if (historicoSection) historicoSection.classList.add("d-none");
+
+    clearInterval(comercialInterval);
+    clearInterval(historicoInterval);
+    financeiroInterval = setInterval(listarPedidosPendentesFinanceiro, 10000);
+
     listarPedidosPendentesFinanceiro();
     selecionarItemMenu("pendente-financeiro-tab");
   }
@@ -50,6 +57,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (pendenteFinanceiroSection) pendenteFinanceiroSection.classList.add("d-none");
     if (pendenteComercialSection) pendenteComercialSection.classList.remove("d-none");
     if (historicoSection) historicoSection.classList.add("d-none");
+
+    clearInterval(financeiroInterval);
+    clearInterval(historicoInterval);
+    comercialInterval = setInterval(listarPedidosPendentesComercial, 10000);
+
     listarPedidosPendentesComercial();
     selecionarItemMenu("pendente-comercial-tab");
   }
@@ -58,6 +70,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (pendenteFinanceiroSection) pendenteFinanceiroSection.classList.add("d-none");
     if (pendenteComercialSection) pendenteComercialSection.classList.add("d-none");
     if (historicoSection) historicoSection.classList.remove("d-none");
+
+    clearInterval(financeiroInterval);
+    clearInterval(comercialInterval);
+    historicoInterval = setInterval(() => listarPedidosHistorico(buscaFornecedor.value), 10000);
+
     listarPedidosHistorico(buscaFornecedor.value);
     selecionarItemMenu("historico-tab");
   }
@@ -451,9 +468,6 @@ document.addEventListener("DOMContentLoaded", () => {
       ? "Data Inválida"
       : date.toLocaleString("pt-BR");
   }
-
-  setInterval(listarPedidosPendentesFinanceiro, 10000);
-  setInterval(() => listarPedidosHistorico(buscaFornecedor.value), 10000);
 
   mostrarSecaoPendenteFinanceiro();
 });
