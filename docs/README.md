@@ -42,13 +42,7 @@ Frontend web em Vite com autenticação, listagem de pedidos pendentes, históri
 
 ## Como executar ou acessar
 
-```bash
-cd /Users/lucas/Projetos/feira-libera-cupom
-npm install
-npm run dev
-```
-
-Build:
+Build de produção:
 
 ```bash
 npm run build
