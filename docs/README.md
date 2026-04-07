@@ -40,7 +40,7 @@ Frontend web em Vite com autenticação, listagem de pedidos pendentes, históri
 - Bootstrap
 - Amazon Cognito
 
-## Como executar ou acessar
+## Como executar
 
 Build de produção:
 
