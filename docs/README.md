@@ -1,88 +1,39 @@
 # feira-libera-cupom
 
+## Identificação
+- Tipo: Frontend (Vite + JS vanilla)
+- Status: Inativo (uso pontual em edição da feira)
+
+## Área e setor
+- Área responsável: TI
+- Setor atendido: Comercial
+
 ## Objetivo
+Frontend de **liberação de cupons** durante a feira interna (Experiência 360). Permite ao operador validar e liberar cupons emitidos durante a feira. Repositório `grupobrf1/feira-libera-cupom`.
 
-Disponibilizar uma interface web para o financeiro aprovar ou reprovar pedidos e cupons da campanha Experiência 360.
+## Necessidade que originou
+A liberação de cupons na feira precisa de tela específica para validar elegibilidade e registrar a liberação. Era preciso uma SPA leve para a equipe da feira.
 
-## Problema que resolve
+## Como acessar / executar
+- Modo: SPA estática servida durante a feira
+- Caminho local: `/Users/lucas/Projetos/feira-libera-cupom`
+- Build: `yarn install` + `yarn build`
 
-Centraliza a análise financeira dos pedidos e reduz aprovação manual sem histórico padronizado.
+## Stack e integrações
+- Build: Vite
+- Linguagem: JavaScript vanilla
+- Sistemas integrados: `Auth-BRF1`, `feira-sorteio-cupons`
 
-## Áreas ou setores atendidos
+## Inovação e avanço técnico
+- Tela dedicada para liberação de cupom
+- Reuso planejado em próximas edições
 
-- Financeiro
-- Comercial
-- Operação da campanha
+## Incertezas / desafios técnicos
+- Sazonalidade
+- Sincronização com o sorteio de cupons
 
-## Público principal
+## Resultados / ganhos
+- Liberação de cupom controlada
 
-Usuários internos responsáveis pela validação financeira dos pedidos.
-
-## Escopo resumido
-
-Frontend web em Vite com autenticação, listagem de pedidos pendentes, histórico de solicitações aprovadas ou negadas e ações de aprovação ou reprovação.
-
-## Funcionamento lógico resumido
-
-- Origem dos dados: API da campanha em `https://api.grupobrf1.com:10000`.
-- Entrada: credenciais do usuário, navegação entre abas e ações de aprovação ou reprovação.
-- Processamento principal: consulta listas de pedidos pendentes, aprovados e negados, filtra histórico por fornecedor e envia a decisão financeira.
-- Saída: tela atualizada com histórico e status do pedido.
-- Integrações: rotas `listarpedidosnaovalidados`, `listarsolicitacoesaprovadas`, `listarsolicitacoesnegadas` e `aprovarrejeitarpedido`.
-- Regra principal de negócio: somente pedidos pendentes podem receber aprovação ou reprovação financeira pela interface.
-- Fluxo resumido: usuário autentica -> frontend carrega pendentes -> operador aprova ou reprova -> histórico é atualizado.
-
-## Tecnologias principais
-
-- Vite
-- JavaScript
-- HTML/CSS
-- Bootstrap
-- Amazon Cognito
-
-## Como executar
-
-Build de produção:
-
-```bash
-npm run build
-```
-
-## Integrações
-
-- API `https://api.grupobrf1.com:10000`
-- autenticação baseada em Amazon Cognito
-
-## Publicação web
-
-### Nginx
-
-```nginx
-server {
-    listen 80;
-    server_name <subdominio>;
-
-    root /var/www/feira-libera-cupom/dist;
-    index index.html;
-
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-}
-```
-
-### Cloudflare
-
-- criar registro DNS do subdomínio
-- apontar para o servidor da aplicação
-- ajustar proxy e SSL conforme o padrão do ambiente
-
-## Status de produção
-
-Há indício de uso como frontend interno da campanha. Solicitante original, URL final e período de uso ainda precisam de confirmação retroativa.
-
-## Pendências para registro retroativo
-
-- Confirmar solicitante original
-- Confirmar URL ou subdomínio final
-- Confirmar período de uso em produção
+## Equipe
+- Responsável técnico: TI
